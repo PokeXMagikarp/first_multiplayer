@@ -1,5 +1,12 @@
+print("running client.py...")
+
 
 import pygame
+from network import Network
+
+
+
+
 width=500
 height=500
 
@@ -38,24 +45,51 @@ class Player():
         if keys[pygame.K_DOWN]:
             self.y+=self.vel
 
+        self.update()
+    def update(self):
         self.rect=(self.x,self.y,self.width,self.height)
+def read_pos(str):
+    str=str.split(",")
+    return int(str[0]),int(str[1])
 
-def redrawWindow(win,player):
+def make_pos(tup):
+    return str(tup[0])+","+str(tup[1])
+
+def redrawWindow(win,player,player2):
     win.fill((255,255,255))
     player.draw(win)
+    player2.draw(win)
     pygame.display.update()
 
 
 def main():
     run=True
-    p=Player(50,50,100,100,(0,255,0))
+    n=Network()
+    startPos=read_pos(n.getPos())
+    p=Player(startPos[0],startPos[1],100,100,(0,255,0))
+    p2=Player(0,0,100,100,(255,0,0))
     clock=pygame.time.Clock()
     while run:
         clock.tick(60)
+        
+
+ ######this part not working ########start ftomr 1:01 in video      
+        buffer1=make_pos((p.x,p.y))
+        buffer=n.send(buffer1)#for some reason when i reciecve data after sending "(100,100)" it recieves ""
+        p2Pos=read_pos(buffer)
+
+        #p2Pos=read_pos(n.send(make_pos((p.x,p.y))))
+
+##########################################################################
+
+        p2.x=p2Pos[0]
+        p2.y=p2Pos[1]
+        p2.update()
+
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 run=False
                 pygame.quit()
         p.move()
-        redrawWindow(win,p)
+        redrawWindow(win,p,p2)
 main()
